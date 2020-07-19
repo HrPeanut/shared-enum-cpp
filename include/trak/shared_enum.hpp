@@ -50,6 +50,50 @@ namespace trak {
     };
 
     /**
+     * Invalid specification.
+     */
+    template<typename, typename>
+    struct prepend_to_shared_enum {};
+
+    /**
+     * Prepends T to a shared enum template parameter list and provides public member typedef type.
+     *
+     * @tparam T
+     *      The type to prepend.
+     * @tparam Ts
+     *      The list of types of the shared enum.
+     */
+    template<typename T, typename... Ts>
+    struct prepend_to_shared_enum<T, shared_enum<Ts...>> {
+        using type = shared_enum<T, Ts...>;
+    };
+
+    /**
+     * Intersect shared enum types and provides public typedef type equal to a shared enum of the intersection.
+     */
+    template<typename, typename>
+    struct intersect_shared_enum {
+        using type = shared_enum<>;
+    };
+
+    /**
+     * Intersects shared enum types and provides public typedef type equal to a shared enum of the intersection.
+     *
+     * @tparam T
+     *      The head of the first list of shared enum types.
+     * @tparam Ts
+     *      The tail of the first list of shared enum types.
+     * @tparam Us
+     *      The second list of shared enum types.
+     */
+    template<typename T, typename... Ts, typename... Us>
+    struct intersect_shared_enum<shared_enum<T, Ts...>, shared_enum<Us...>> {
+        using type = typename std::conditional<is_member_of_shared_enum<T, Us...>::value,
+                typename prepend_to_shared_enum<T, typename intersect_shared_enum<shared_enum<Ts...>, shared_enum<Us...>>::type>::type,
+                typename intersect_shared_enum<shared_enum<Ts...>, shared_enum<Us...>>::type>::type;
+    };
+
+    /**
      * Base of shared enums containing the actual enum value.
      *
      * @tparam T

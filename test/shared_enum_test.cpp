@@ -50,7 +50,16 @@ TEST(shared_enum, member) {
 }
 
 TEST(shared_enum, intersection) {
-
+    auto test = std::is_same<typename intersect_shared_enum<shared_enum<A>, shared_enum<A>>::type, shared_enum<A>>::value;
+    EXPECT_TRUE(test);
+    test = std::is_same<typename intersect_shared_enum<shared_enum<A, B>, shared_enum<A>>::type, shared_enum<A>>::value;
+    EXPECT_TRUE(test);
+    test = std::is_same<typename intersect_shared_enum<shared_enum<A, B, C>, shared_enum<A>>::type, shared_enum<A>>::value;
+    EXPECT_TRUE(test);
+    test = std::is_same<typename intersect_shared_enum<shared_enum<B, C>, shared_enum<A, B, C>>::type, shared_enum<B, C>>::value;
+    EXPECT_TRUE(test);
+    test = std::is_same<typename intersect_shared_enum<shared_enum<A, B, C>, shared_enum<A, B, C>>::type, shared_enum<A, B, C>>::value;
+    EXPECT_TRUE(test);
 }
 
 //TEST(shared_enum, convertible) {
