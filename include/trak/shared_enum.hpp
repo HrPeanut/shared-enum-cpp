@@ -137,6 +137,7 @@ namespace trak {
      */
     template<typename T>
     class shared_enum<T> : public shared_enum_base<typename std::underlying_type<T>::type> {
+        static_assert(std::is_enum<T>::value, "T is not an enum");
     public:
         using underlying_type = typename std::underlying_type<T>::type;
 
@@ -172,10 +173,51 @@ namespace trak {
         constexpr inline operator T() const noexcept {
             return static_cast<T>(this->value_);
         }
+
+        /**
+         * Returns \c true if this enum value is equal to the right-hand side value. Otherwise, return \c false.
+         *
+         * @tparam Us
+         *      The list of types of the right-hand side shared_enum.
+         * @param rhs
+         *      The shared_enum to compare against.
+         * @return
+         *      \c true if equal. Otherwise, \c false.
+         */
+        template<typename... Us>
+        constexpr inline auto operator==(shared_enum<Us...> rhs) const -> typename std::enable_if<!std::is_same<
+                typename intersect_shared_enum<shared_enum<T>, shared_enum<Us...>>::type, shared_enum<>>::value, bool>::type {
+            return static_cast<underlying_type>(*this) == static_cast<underlying_type>(rhs);
+        }
+
+        /**
+         * Returns \c true if this enum value is equal to the right-hand side value. Otherwise, return \c false.
+         *
+         * @tparam U
+         *      The type of the right-hand side value.
+         * @param rhs
+         *      The value to compare against.
+         * @return
+         *      \c true of equal. Otherwise, \c false.
+         */
+        template<typename U>
+        constexpr inline auto operator==(U rhs) const -> typename std::enable_if<is_member_of_shared_enum<U, T>::value, bool>::type {
+            return static_cast<underlying_type>(*this) == static_cast<underlying_type>(rhs);
+        }
     };
 
+    /**
+     * Represents an enum value being a member of multiple enums.
+     * The value is implicitly convertible to T.
+     *
+     * @tparam T
+     *      The head of the valid types of the shared enum.
+     * @tparam Ts
+     *      The tail of the valid types of the shared enum.
+     */
     template<typename T, typename... Ts>
-    class shared_enum<T, Ts...> : shared_enum<Ts...> {
+    class shared_enum<T, Ts...> : public shared_enum<Ts...> {
+        static_assert(std::is_enum<T>::value, "T is not an enum");
     public:
         using underlying_type = typename shared_enum<Ts...>::underlying_type;
 
@@ -190,6 +232,55 @@ namespace trak {
         template<typename U>
         constexpr inline shared_enum(U value) noexcept : shared_enum<Ts...>(static_cast<underlying_type>(value)) {
             static_assert(is_member_of_shared_enum<U, T, Ts...>::value, "U is not a member of shared enum");
+        }
+
+        /**
+         * Constructor
+         *
+         * @param value
+         *      The value of this shared enum.
+         */
+        constexpr inline explicit shared_enum(underlying_type value) noexcept : shared_enum<Ts...>(value) {}
+
+        /**
+         * Cast operator allowing for implicit conversion to T.
+         *
+         * @return
+         *      The enum value as T.
+         */
+        constexpr inline operator T() const noexcept {
+            return static_cast<T>(this->value_);
+        }
+
+        /**
+         * Returns \c true if this enum value is equal to the right-hand side value. Otherwise, return \c false.
+         *
+         * @tparam Us
+         *      The list of types of the right-hand side shared_enum.
+         * @param rhs
+         *      The shared_enum to compare against.
+         * @return
+         *      \c true if equal. Otherwise, \c false.
+         */
+        template<typename... Us>
+        constexpr inline auto operator==(shared_enum<Us...> rhs) const -> typename std::enable_if<!std::is_same<
+                typename intersect_shared_enum<shared_enum<T, Ts...>, shared_enum<Us...>>::type, shared_enum<>>::value, bool>::type {
+            return static_cast<underlying_type>(*this) == static_cast<underlying_type>(rhs);
+        }
+
+        /**
+         * Returns \c true if this enum value is equal to the right-hand side value. Otherwise, return \c false.
+         *
+         * @tparam U
+         *      The type of the right-hand side value.
+         * @param rhs
+         *      The value to compare against.
+         * @return
+         *      \c true of equal. Otherwise, \c false.
+         */
+        template<typename U>
+        constexpr inline auto operator==(U rhs) const -> typename std::enable_if<is_member_of_shared_enum<U, T, Ts...>::value, bool>::type {
+            return static_cast<underlying_type>(*this) == static_cast<underlying_type>(rhs);
         }
     };
 }
