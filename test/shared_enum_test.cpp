@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <trak/shared_enum.hpp>
+#include <trak/shared_bitfield.hpp>
 
 using namespace trak;
 
@@ -20,6 +21,21 @@ enum class C : unsigned int {
     Second,
     Third
 };
+
+constexpr inline A operator|(const A& a, const A& b)
+{
+    return static_cast<A>(static_cast<std::underlying_type<A>::type>(a) | static_cast<std::underlying_type<A>::type>(b));
+}
+
+constexpr inline A operator&(const A& a, const A& b)
+{
+    return static_cast<A>(static_cast<std::underlying_type<A>::type>(a) & static_cast<std::underlying_type<A>::type>(b));
+}
+
+constexpr inline A operator^(const A& a, const A& b)
+{
+    return static_cast<A>(static_cast<std::underlying_type<A>::type>(a) ^ static_cast<std::underlying_type<A>::type>(b));
+}
 
 TEST(shared_enum, member) {
     auto test = is_member_of_shared_enum<A, A, B, C>::value;
@@ -107,4 +123,36 @@ TEST(shared_enum, comparable) {
     EXPECT_EQ(shared_1, shared_2);
     EXPECT_EQ(shared_1, shared_ab_first);
     EXPECT_EQ(shared_1, shared_bc_first);
+}
+
+TEST(shared_bitfield, operator_or) {
+    shared_bitfield<A, B> bitfield_ab_second = A::Second;
+    shared_bitfield<B, C> bitfield_bc_third = B::Third;
+    EXPECT_EQ(3, takes_B(bitfield_ab_second | bitfield_bc_third));
+
+    EXPECT_EQ(A::Second, bitfield_ab_second);
+    bitfield_ab_second |= bitfield_bc_third;
+    EXPECT_EQ(A::Second | A::Third, bitfield_ab_second);
+}
+
+TEST(shared_bitfield, operator_and) {
+    shared_bitfield<A, B> bitfield_ab_second = A::Second;
+    shared_bitfield<B, C> bitfield_bc_third = B::Third;
+
+    EXPECT_EQ(0, takes_B(bitfield_ab_second & bitfield_bc_third));
+
+    EXPECT_EQ(A::Second, bitfield_ab_second);
+    bitfield_ab_second &= bitfield_bc_third;
+    EXPECT_EQ(A::Second & A::Third, bitfield_ab_second);
+}
+
+TEST(shared_bitfield, operator_xor) {
+    shared_bitfield<A, B> bitfield_ab_second = A::Second;
+    shared_bitfield<B, C> bitfield_bc_third = B::Third;
+
+    EXPECT_EQ(3, takes_B(bitfield_ab_second ^ bitfield_bc_third));
+
+    EXPECT_EQ(A::Second, bitfield_ab_second);
+    bitfield_ab_second ^= bitfield_bc_third;
+    EXPECT_EQ(A::Second ^ A::Third, bitfield_ab_second);
 }

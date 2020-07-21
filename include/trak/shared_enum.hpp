@@ -7,7 +7,7 @@ namespace trak {
 
     /**
      * Represents an enum value being member of multiple enums.
-     * The value is implicitly convertible to each member type.
+     * The value is implicitly convertible to each enum type.
      *
      * @tparam Ts
      *      List of types this enum value is member of.
