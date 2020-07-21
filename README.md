@@ -1,6 +1,8 @@
 # Shared Enum and Bitfield Types
 This library provides classes for enum values that are shared between multiple enums. 
-This allows for importing enums to namespace, when a enum name is shared by multiple classes
+This allows for importing enums to namespace, when a enum name is shared by multiple classes.
+
+This library is inspired by [glbinding](https://github.com/cginternals/glbinding)'s `SharedBitfield`.
 
 # Usage
 ```cpp
