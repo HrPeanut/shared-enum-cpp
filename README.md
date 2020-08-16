@@ -41,8 +41,8 @@ enum class B : unsigned int {
     AnotherSharedEnum
 };
 
-constexpr inline trak::shared_enum<A, B> SharedEnum = A::SharedEnum;
-constexpr inline trak::shared_enum<A, B> AnotherSharedEnum = B::AnotherSharedEnum;
+constexpr inline trak::shared_bitfield<A, B> SharedEnum = A::SharedEnum;
+constexpr inline trak::shared_bitfield<A, B> AnotherSharedEnum = B::AnotherSharedEnum;
 
 # Implicitly convertible
 void takesA(A a);
